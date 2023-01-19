@@ -11,7 +11,7 @@ import (
 	"github.com/mattermost/mattermost-server/v6/shared/markdown"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost-plugin-autolink/server/api"
+	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/api"
 )
 
 // Plugin the main struct for everything
@@ -177,9 +177,25 @@ func (p *Plugin) ProcessPost(c *plugin.Context, post *model.Post) (*model.Post, 
 				continue
 			}
 
-			out := link.Replace(processed)
+			out, hits := link.Replace(processed)
+
 			if out == processed {
 				continue
+			}
+
+			// Logging hits to server log
+			if link.LogHits {
+				author, authorErr = p.API.GetUser(post.UserId)
+
+				for _, hit := range hits {
+					p.API.LogInfo(
+						fmt.Sprintf("User `%s` (id: `%s`) posted link `%s` in `%s`",
+							author.Username,
+							post.UserId,
+							hit,
+							post.ChannelId))
+				}
+
 			}
 
 			if !link.ProcessBotPosts {

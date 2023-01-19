@@ -1,9 +1,9 @@
 # Autolink  Plugin
 
-[![Build Status](https://img.shields.io/circleci/project/github/mattermost/mattermost-plugin-autolink/master.svg)](https://circleci.com/gh/mattermost/mattermost-plugin-autolink)
-[![Code Coverage](https://img.shields.io/codecov/c/github/mattermost/mattermost-plugin-autolink/master.svg)](https://codecov.io/gh/mattermost/mattermost-plugin-autolink)
-[![Release](https://img.shields.io/github/v/release/mattermost/mattermost-plugin-autolink)](https://github.com/mattermost/mattermost-plugin-autolink/releases/latest)
-[![HW](https://img.shields.io/github/issues/mattermost/mattermost-plugin-autolink/Up%20For%20Grabs?color=dark%20green&label=Help%20Wanted)](https://github.com/mattermost/mattermost-plugin-autolink/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Up+For+Grabs%22+label%3A%22Help+Wanted%22)
+[![Build Status](https://img.shields.io/circleci/project/github/dmarushkin/mattermost-plugin-autolink-with-log/master.svg)](https://circleci.com/gh/dmarushkin/mattermost-plugin-autolink-with-log)
+[![Code Coverage](https://img.shields.io/codecov/c/github/dmarushkin/mattermost-plugin-autolink-with-log/master.svg)](https://codecov.io/gh/dmarushkin/mattermost-plugin-autolink-with-log)
+[![Release](https://img.shields.io/github/v/release/dmarushkin/mattermost-plugin-autolink-with-log)](https://github.com/dmarushkin/mattermost-plugin-autolink-with-log/releases/latest)
+[![HW](https://img.shields.io/github/issues/dmarushkin/mattermost-plugin-autolink-with-log/Up%20For%20Grabs?color=dark%20green&label=Help%20Wanted)](https://github.com/dmarushkin/mattermost-plugin-autolink-with-log/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Up+For+Grabs%22+label%3A%22Help+Wanted%22)
 
 **Maintainer:** [@levb](https://github.com/levb)
 **Co-Maintainer:** [@iomodo](https://github.com/iomodo)
@@ -22,7 +22,7 @@ Use it to add custom auto-linking on your Mattermost system, such as adding link
 
 ## Configuration
 1. Go to **System Console > Plugins > Management** and click **Enable** to enable the Autolink plugin.
-    - If you are running Mattermost v5.11 or earlier, you must first go to the [releases page of this GitHub repository](https://github.com/mattermost/mattermost-plugin-autolink), download the latest release, and upload it to your Mattermost instance [following this documentation](https://docs.mattermost.com/administration/plugins.html#plugin-uploads).
+    - If you are running Mattermost v5.11 or earlier, you must first go to the [releases page of this GitHub repository](https://github.com/dmarushkin/mattermost-plugin-autolink-with-log), download the latest release, and upload it to your Mattermost instance [following this documentation](https://docs.mattermost.com/administration/plugins.html#plugin-uploads).
 
 2. Modify your `config.json` file to include the types of regexp patterns you wish to match, under the `PluginSettings`. See below for an example of what this should look like.
 
@@ -42,7 +42,7 @@ Below is an example of regexp patterns used for autolinking at https://community
 "PluginSettings": {
     ...
     "Plugins": {
-        "mattermost-autolink": {
+        "mattermost-autolink-with-log": {
             "links": [
                 {
                     "Pattern": "(LHS)",
@@ -100,7 +100,7 @@ Below is an example of regexp patterns used for autolinking at https://community
     ...
     "PluginStates": {
         ...
-        "mattermost-autolink": {
+        "mattermost-autolink-with-log": {
             "Enable": true
         },
         ...
@@ -149,7 +149,7 @@ The `/autolink` commands allow the users to easily edit the configurations.
  disable \<*linkref*> | Disable the link | `/autolink disable Visa`
  add \<*linkref*> | Creates a new link with the name specified in the command  | `/autolink add Visa`
  delete \<*linkref*> |  Delete the link | `/autolink delete Visa`
- set \<*linkref*> \<*field*> *value* | Sets a link's field to a value <br> *Fields* - <br> <ul><li>Template - Sets the Template field</li><li>Pattern - Sets the Pattern field </li> <li> WordMatch - If true uses the [\b word boundaries](https://www.regular-expressions.info/wordboundaries.html) </li> <li> ProcessBotPosts - If true applies changes to posts made by bot accounts. </li> <li> Scope - Sets the Scope field (`team` or `team/channel` or a whitespace-separated list thereof) </li> | <br> `/autolink set Visa Pattern (?P<VISA>(?P<part1>4\d{3})[ -]?(?P<part2>\d{4})[ -]?(?P<part3>\d{4})[ -]?(?P<LastFour>[0-9]{4}))` <br><br> `/autolink set Visa Template VISA XXXX-XXXX-XXXX-$LastFour` <br><br> `/autolink set Visa WordMatch true` <br><br> `/autolink set Visa ProcessBotPosts true` <br><br> `/autolink set Visa Scope team/townsquare` <br><br>
+ set \<*linkref*> \<*field*> *value* | Sets a link's field to a value <br> *Fields* - <br> <ul><li>Template - Sets the Template field</li><li>Pattern - Sets the Pattern field </li> <li> WordMatch - If true uses the [\b word boundaries](https://www.regular-expressions.info/wordboundaries.html) </li>  <li> LogHits - If true all replaced matches will be logged on serverside </li> <li> ProcessBotPosts - If true applies changes to posts made by bot accounts. </li> <li> Scope - Sets the Scope field (`team` or `team/channel` or a whitespace-separated list thereof) </li> | <br> `/autolink set Visa Pattern (?P<VISA>(?P<part1>4\d{3})[ -]?(?P<part2>\d{4})[ -]?(?P<part3>\d{4})[ -]?(?P<LastFour>[0-9]{4}))` <br><br> `/autolink set Visa Template VISA XXXX-XXXX-XXXX-$LastFour` <br><br> `/autolink set Visa WordMatch true` <br><br> `/autolink set Visa LogHits true` <br><br> `/autolink set Visa ProcessBotPosts true` <br><br> `/autolink set Visa Scope team/townsquare` <br><br>
 
 
 ## Development

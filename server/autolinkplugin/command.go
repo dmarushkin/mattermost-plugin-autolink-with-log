@@ -9,7 +9,7 @@ import (
 	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost-plugin-autolink/server/autolink"
+	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/autolink"
 )
 
 const (
@@ -23,6 +23,7 @@ const (
 	optDisableNonWordPrefix = "DisableNonWordPrefix"
 	optDisableNonWordSuffix = "DisableNonWordSuffix"
 	optWordMatch            = "WordMatch"
+	optLogHits              = "LogHits"
 )
 
 const helpText = "###### Mattermost Autolink Plugin Administration\n" +
@@ -44,6 +45,7 @@ const helpText = "###### Mattermost Autolink Plugin Administration\n" +
 	`/autolink set Visa Pattern (?P<VISA>(?P<part1>4\d{3})[ -]?(?P<part2>\d{4})[ -]?(?P<part3>\d{4})[ -]?(?P<LastFour>[0-9]{4}))` + "\n" +
 	"/autolink set Visa Template VISA XXXX-XXXX-XXXX-$LastFour\n" +
 	"/autolink set Visa WordMatch true\n" +
+	"/autolink set Visa LogHits true\n" +
 	"/autolink set Visa Scope team/townsquare\n" +
 	"/autolink set Visa ProcessBotPosts true\n" +
 	"/autolink test Visa 4356-7891-2345-1111 -- (4111222233334444)\n" +
@@ -194,6 +196,12 @@ func executeSet(p *Plugin, c *plugin.Context, header *model.CommandArgs, args ..
 			return responsef("%v", e)
 		}
 		l.WordMatch = boolValue
+	case optLogHits:
+		boolValue, e := parseBoolArg(value)
+		if e != nil {
+			return responsef("%v", e)
+		}
+		l.LogHits = boolValue
 	case optDisabled:
 		boolValue, e := parseBoolArg(value)
 		if e != nil {
@@ -208,7 +216,7 @@ func executeSet(p *Plugin, c *plugin.Context, header *model.CommandArgs, args ..
 		l.ProcessBotPosts = boolValue
 	default:
 		return responsef("%q is not a supported field, must be one of %q", fieldName,
-			[]string{optName, optDisabled, optPattern, optTemplate, optScope, optDisableNonWordPrefix, optDisableNonWordSuffix, optWordMatch, optProcessBotPosts})
+			[]string{optName, optDisabled, optPattern, optTemplate, optScope, optDisableNonWordPrefix, optDisableNonWordSuffix, optWordMatch, optLogHits, optProcessBotPosts})
 	}
 
 	err = saveConfigLinks(p, links)
@@ -245,7 +253,7 @@ func executeTest(p *Plugin, c *plugin.Context, header *model.CommandArgs, args .
 		if err != nil {
 			return responsef("failed to compile link %s: %v", l.DisplayName(), err)
 		}
-		replaced := l.Replace(orig)
+		replaced, _ := l.Replace(orig)
 		if replaced == orig {
 			out += fmt.Sprintf("- Link %s: _no change_\n", l.DisplayName())
 		} else {

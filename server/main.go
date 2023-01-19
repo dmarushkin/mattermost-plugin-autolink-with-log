@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/mattermost/mattermost-server/v6/plugin"
 
-	"github.com/mattermost/mattermost-plugin-autolink/server/autolinkplugin"
+	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/autolinkplugin"
 )
 
 func main() {

@@ -13,6 +13,7 @@ type Autolink struct {
 	Template             string   `json:"Template"`
 	Scope                []string `json:"Scope"`
 	WordMatch            bool     `json:"WordMatch"`
+	LogHits              bool     `json:"LogHits"`
 	DisableNonWordPrefix bool     `json:"DisableNonWordPrefix"`
 	DisableNonWordSuffix bool     `json:"DisableNonWordSuffix"`
 	ProcessBotPosts      bool     `json:"ProcessBotPosts"`
@@ -31,7 +32,8 @@ func (l Autolink) Equals(x Autolink) bool {
 		l.Pattern != x.Pattern ||
 		len(l.Scope) != len(x.Scope) ||
 		l.Template != x.Template ||
-		l.WordMatch != x.WordMatch {
+		l.WordMatch != x.WordMatch ||
+		l.LogHits != x.LogHits {
 		return false
 	}
 	for i, scope := range l.Scope {
@@ -92,19 +94,25 @@ func (l *Autolink) Compile() error {
 }
 
 // Replace will subsitute the regex's with the supplied links
-func (l Autolink) Replace(message string) string {
+func (l Autolink) Replace(message string) (string, []string) {
+
 	if l.re == nil {
-		return message
+		return message, nil
 	}
 
 	// Since they don't consume, `\b`s require no special handling, can just ReplaceAll
 	if l.canReplaceAll {
-		return l.re.ReplaceAllString(message, l.template)
+		if !l.LogHits {
+			return l.re.ReplaceAllString(message, l.template), nil
+		}
 	}
 
 	// Replace one at a time
 	in := []byte(message)
 	out := []byte{}
+
+	log_hits := []string{}
+
 	for {
 		if len(in) == 0 {
 			break
@@ -115,12 +123,16 @@ func (l Autolink) Replace(message string) string {
 			break
 		}
 
+		if l.LogHits {
+			log_hits = append(log_hits, string(in[submatch[0]:submatch[1]]))
+		}
+
 		out = append(out, in[:submatch[0]]...)
 		out = l.re.Expand(out, []byte(l.template), in, submatch)
 		in = in[submatch[1]:]
 	}
 	out = append(out, in...)
-	return string(out)
+	return string(out), log_hits
 }
 
 // ToMarkdown prints a Link as a markdown list element
@@ -158,6 +170,9 @@ func (l Autolink) ToMarkdown(i int) string {
 	}
 	if l.WordMatch {
 		text += fmt.Sprintf("  - WordMatch: `%v`\n", l.WordMatch)
+	}
+	if l.LogHits {
+		text += fmt.Sprintf("  - LogHits: `%v`\n", l.LogHits)
 	}
 	return text
 }

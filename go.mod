@@ -1,4 +1,4 @@
-module github.com/mattermost/mattermost-plugin-autolink
+module github.com/dmarushkin/mattermost-plugin-autolink-with-log
 
 go 1.12
 

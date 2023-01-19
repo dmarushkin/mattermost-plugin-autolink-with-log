@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost-plugin-autolink/server/autolink"
+	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/autolink"
 )
 
 type Store interface {

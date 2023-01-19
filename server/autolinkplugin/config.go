@@ -9,7 +9,7 @@ import (
 	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost-plugin-autolink/server/autolink"
+	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/autolink"
 )
 
 // Config from config.json
@@ -132,6 +132,11 @@ func getAutoCompleteData() *model.AutocompleteData {
 				HelpText: "If true uses the \\b word boundaries",
 				Hint:     "",
 				Item:     "WordMatch",
+			},
+			{
+				HelpText: "If true loggin on server all pattern matches",
+				Hint:     "",
+				Item:     "LogHits",
 			},
 			{
 				HelpText: "If true applies changes to posts created by bot accounts.",

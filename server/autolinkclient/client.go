@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/mattermost/mattermost-plugin-autolink/server/autolink"
+	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/autolink"
 )
 
-const autolinkPluginID = "mattermost-autolink"
+const autolinkPluginID = "mattermost-autolink-with-log"
 
 type PluginAPI interface {
 	PluginHTTP(*http.Request) *http.Response
