@@ -70,6 +70,8 @@ var autolinkCommandHandler = CommandHandler{
 		"add":     executeAdd,
 		"set":     executeSet,
 		"test":    executeTest,
+		"log":     executeLogChannel,
+		"bot":     executeBotId,
 	},
 	defaultHandler: executeHelp,
 }
@@ -320,6 +322,50 @@ func executeAdd(p *Plugin, c *plugin.Context, header *model.CommandArgs, args ..
 	return executeList(p, c, header, name)
 }
 
+func executeLogChannel(p *Plugin, c *plugin.Context, header *model.CommandArgs, args ...string) *model.CommandResponse {
+
+	if len(args) > 1 {
+		return responsef(helpText)
+	}
+
+	channel := ""
+
+	if len(args) == 1 {
+		channel = args[0]
+	}
+
+	err := saveConfigLogChannel(p, channel)
+
+	if err != nil {
+		return responsef(err.Error())
+	}
+
+	return executeList(p, c, header)
+
+}
+
+func executeBotId(p *Plugin, c *plugin.Context, header *model.CommandArgs, args ...string) *model.CommandResponse {
+
+	if len(args) > 1 {
+		return responsef(helpText)
+	}
+
+	bot_id := ""
+
+	if len(args) == 1 {
+		bot_id = args[0]
+	}
+
+	err := saveConfigBotId(p, bot_id)
+
+	if err != nil {
+		return responsef(err.Error())
+	}
+
+	return executeList(p, c, header)
+
+}
+
 func executeHelp(p *Plugin, c *plugin.Context, header *model.CommandArgs, args ...string) *model.CommandResponse {
 	return responsef(helpText)
 }
@@ -408,6 +454,38 @@ func parseBoolArg(arg string) (bool, error) {
 func saveConfigLinks(p *Plugin, links []autolink.Autolink) error {
 	conf := p.getConfig()
 	conf.Links = links
+
+	configMap, err := p.getConfig().ToMap()
+	if err != nil {
+		return err
+	}
+
+	appErr := p.API.SavePluginConfig(configMap)
+	if appErr != nil {
+		return appErr
+	}
+	return nil
+}
+
+func saveConfigLogChannel(p *Plugin, channel string) error {
+	conf := p.getConfig()
+	conf.LogChannel = channel
+
+	configMap, err := p.getConfig().ToMap()
+	if err != nil {
+		return err
+	}
+
+	appErr := p.API.SavePluginConfig(configMap)
+	if appErr != nil {
+		return appErr
+	}
+	return nil
+}
+
+func saveConfigBotId(p *Plugin, BotId string) error {
+	conf := p.getConfig()
+	conf.BotId = BotId
 
 	configMap, err := p.getConfig().ToMap()
 	if err != nil {

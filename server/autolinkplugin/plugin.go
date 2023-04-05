@@ -14,6 +14,12 @@ import (
 	"github.com/dmarushkin/mattermost-plugin-autolink-with-log/server/api"
 )
 
+const (
+	botUsername    = "SecurityBot"
+	botDisplayName = "SecurityBot"
+	botDescription = "A security bot account created by the autolink plugin."
+)
+
 // Plugin the main struct for everything
 type Plugin struct {
 	plugin.MattermostPlugin
@@ -32,6 +38,7 @@ func New() *Plugin {
 }
 
 func (p *Plugin) OnActivate() error {
+
 	p.handler = api.NewHandler(p, p)
 
 	return nil
@@ -137,7 +144,53 @@ func (p *Plugin) ProcessPost(c *plugin.Context, post *model.Post) (*model.Post, 
 	var author *model.User
 	var authorErr *model.AppError
 
+	// Only logging for hits raw messages
+
+	log_channel_id := p.getConfig().LogChannel
+	bot_id := p.getConfig().BotId
+
+	if log_channel_id != "" && bot_id != "" {
+
+		for _, link := range conf.Links {
+
+			if !p.inScope(link.Scope, channelName, teamName) {
+				continue
+			}
+
+			author, authorErr = p.API.GetUser(post.UserId)
+
+			// Logging hits to server log for raw messages
+			if link.LogHits && !author.IsBot {
+
+				_, hits := link.Replace(post.Message)
+
+				for _, hit := range hits {
+
+					LogMessage := &model.Post{
+						UserId:    bot_id,
+						ChannelId: log_channel_id,
+						Message: fmt.Sprintf("User %s (id: %s) posted %s in channel %s",
+							author.Username,
+							post.UserId,
+							hit,
+							post.ChannelId),
+					}
+
+					_, err := p.API.CreatePost(LogMessage)
+
+					if err != nil {
+						p.API.LogError(fmt.Sprintf("Can't send log message to channel %s", log_channel_id), "err", err)
+					}
+
+				}
+			}
+		}
+	}
+
 	markdown.Inspect(post.Message, func(node interface{}) bool {
+
+		// Changing messages
+
 		if node == nil {
 			return false
 		}
@@ -154,7 +207,7 @@ func (p *Plugin) ProcessPost(c *plugin.Context, post *model.Post) (*model.Post, 
 			// Do not process escaped links. Not exactly sure why but preserving the previous behavior.
 			// https://mattermost.atlassian.net/browse/MM-42669
 			if markdown.Unescape(toProcess) != toProcess {
-				p.API.LogDebug("skipping escaped autolink", "original", toProcess, "post_id", post.Id)
+				p.API.LogInfo("skipping escaped autolink", "original", toProcess, "post_id", post.Id)
 				return true
 			}
 
@@ -162,7 +215,7 @@ func (p *Plugin) ProcessPost(c *plugin.Context, post *model.Post) (*model.Post, 
 			start, end = node.Range.Position+offset, node.Range.End+offset
 			toProcess = message[start:end]
 			if node.Text != toProcess {
-				p.API.LogDebug("skipping text: parsed markdown did not match original", "parsed", node.Text, "original", toProcess, "post_id", post.Id)
+				p.API.LogInfo("skipping text: parsed markdown did not match original", "parsed", node.Text, "original", toProcess, "post_id", post.Id)
 				return true
 			}
 		}
@@ -172,30 +225,16 @@ func (p *Plugin) ProcessPost(c *plugin.Context, post *model.Post) (*model.Post, 
 		}
 
 		processed := toProcess
+
 		for _, link := range conf.Links {
 			if !p.inScope(link.Scope, channelName, teamName) {
 				continue
 			}
 
-			out, hits := link.Replace(processed)
+			out, _ := link.Replace(processed)
 
 			if out == processed {
 				continue
-			}
-
-			// Logging hits to server log
-			if link.LogHits {
-				author, authorErr = p.API.GetUser(post.UserId)
-
-				for _, hit := range hits {
-					p.API.LogInfo(
-						fmt.Sprintf("User `%s` (id: `%s`) posted link `%s` in `%s`",
-							author.Username,
-							post.UserId,
-							hit,
-							post.ChannelId))
-				}
-
 			}
 
 			if !link.ProcessBotPosts {
@@ -231,6 +270,7 @@ func (p *Plugin) ProcessPost(c *plugin.Context, post *model.Post) (*model.Post, 
 		post.Message = message
 		post.Hashtags, _ = model.ParseHashtags(message)
 	}
+
 	return post, ""
 }
 

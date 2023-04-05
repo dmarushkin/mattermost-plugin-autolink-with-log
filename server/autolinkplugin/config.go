@@ -17,6 +17,8 @@ type Config struct {
 	EnableAdminCommand bool                `json:"enableadmincommand"`
 	EnableOnUpdate     bool                `json:"enableonupdate"`
 	PluginAdmins       string              `json:"pluginadmins"`
+	LogChannel         string              `json:"logchannel"`
+	BotId              string              `json:"botid"`
 	Links              []autolink.Autolink `json:"links"`
 
 	// AdminUserIds is a set of UserIds that are permitted to perform
@@ -75,6 +77,16 @@ func getAutoCompleteData() *model.AutocompleteData {
 		"Add a new link with a given name")
 	add.AddTextArgument("Name for a new link", "[name]", "")
 	autolink.AddCommand(add)
+
+	log := model.NewAutocompleteData("log", "",
+		"set log channel with a given id")
+	log.AddTextArgument("ID for a log channel", "[channel_id]", "")
+	autolink.AddCommand(log)
+
+	bot := model.NewAutocompleteData("bot", "",
+		"set bot with a given id")
+	bot.AddTextArgument("ID for a bot", "[bot_id]", "")
+	autolink.AddCommand(bot)
 
 	delete := model.NewAutocompleteData("delete", "",
 		"Delete a link with a given name")

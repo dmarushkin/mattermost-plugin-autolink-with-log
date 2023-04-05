@@ -45,7 +45,24 @@
                 "help_text": "Comma-separated list of user IDs authorized to administer the plugin in addition to the System Admins.\n \n User IDs can be found by navigating to **System Console \u003e User Management \u003e Users**.",
                 "placeholder": "",
                 "default": null
+            },
+            {
+                "key": "logchannel",
+                "display_name": "Log Channel:",
+                "type": "text",
+                "help_text": "Channel to alert hits",
+                "placeholder": "",
+                "default": null
+            },
+            {
+                "key": "botid",
+                "display_name": "Bot ID:",
+                "type": "text",
+                "help_text": "Bot to alert from",
+                "placeholder": "",
+                "default": null
             }
+
         ]
     }
 }
