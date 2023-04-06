@@ -8,6 +8,11 @@
 **Maintainer:** [@levb](https://github.com/levb)
 **Co-Maintainer:** [@iomodo](https://github.com/iomodo)
 
+
+
+
+
+
 This plugin creates regular expression (regexp) patterns that are reformatted into a Markdown link before the message is saved into the database.
 
 Use it to add custom auto-linking on your Mattermost system, such as adding links to your issue tracker based on the regexp patterns.
@@ -19,6 +24,35 @@ Use it to add custom auto-linking on your Mattermost system, such as adding link
 ![image](https://user-images.githubusercontent.com/13119842/58675165-11f5ed80-8321-11e9-9d41-91088a79a11b.png)
 
 *..automatically links to the corresponding issue in the Jira project*
+
+## Fork with logging
+
+Fork added posting captured hits to private channel, in my case to log google docs links with sensitive information shared to public.
+
+Setup channel to log into:
+```
+/autolink log <channel_id>
+```
+
+Setup bot for from massages:
+```
+/autolink bot <bot_id>
+```
+
+Setup new rule with logging:
+```
+/autolink add GSheets
+/autolink set GSheets Pattern \[https://docs\.google\.com/spreadsheets/d/(?P<doc_id>[^\/]+)/(?P<link_trail>[^\]]+)\]\((?P<link>[^\)]+)\)
+/autolink set GSheets Template [GSheet-${doc_id}](https://docs.google.com/spreadsheets/d/${doc_id}/${link_trail})
+/autolink set GSheets LogHits true
+/autolink enable GSheets
+``` 
+
+You'll get massages like these:
+``` 
+User testuser (id: dadfipiegidjpc6ddagidixznw) posted https://docs.google.com/spreadsheets/d/1rHdwPFGlZZRifuVolhBkpB7ROnukj3832tcY71PwNII/edit#gid=0 in channel cqu4gfakx7nafc5yhpe6q3q3eo
+``` 
+
 
 ## Configuration
 1. Go to **System Console > Plugins > Management** and click **Enable** to enable the Autolink plugin.
@@ -149,7 +183,7 @@ The `/autolink` commands allow the users to easily edit the configurations.
  disable \<*linkref*> | Disable the link | `/autolink disable Visa`
  add \<*linkref*> | Creates a new link with the name specified in the command  | `/autolink add Visa`
  delete \<*linkref*> |  Delete the link | `/autolink delete Visa`
- set \<*linkref*> \<*field*> *value* | Sets a link's field to a value <br> *Fields* - <br> <ul><li>Template - Sets the Template field</li><li>Pattern - Sets the Pattern field </li> <li> WordMatch - If true uses the [\b word boundaries](https://www.regular-expressions.info/wordboundaries.html) </li>  <li> LogHits - If true all replaced matches will be logged on serverside </li> <li> ProcessBotPosts - If true applies changes to posts made by bot accounts. </li> <li> Scope - Sets the Scope field (`team` or `team/channel` or a whitespace-separated list thereof) </li> | <br> `/autolink set Visa Pattern (?P<VISA>(?P<part1>4\d{3})[ -]?(?P<part2>\d{4})[ -]?(?P<part3>\d{4})[ -]?(?P<LastFour>[0-9]{4}))` <br><br> `/autolink set Visa Template VISA XXXX-XXXX-XXXX-$LastFour` <br><br> `/autolink set Visa WordMatch true` <br><br> `/autolink set Visa LogHits true` <br><br> `/autolink set Visa ProcessBotPosts true` <br><br> `/autolink set Visa Scope team/townsquare` <br><br>
+ set \<*linkref*> \<*field*> *value* | Sets a link's field to a value <br> *Fields* - <br> <ul><li>Template - Sets the Template field</li><li>Pattern - Sets the Pattern field </li> <li> WordMatch - If true uses the [\b word boundaries](https://www.regular-expressions.info/wordboundaries.html) </li>  <li> LogHits - If true all replaced matches will be logged on serverside </li> <li> ProcessBotPosts - If true applies changes to posts made by bot accounts. </li> <li> Scope - Sets the Scope field (`team` or `team/channel` or a whitespace-separated list thereof) </li> | <br> `/autolink set Visa Pattern (?P<VISA>(?P<part1>4\d{3})[ -]?(?P<part2>\d{4})[ -]?(?P<part3>\d{4})[ -]?(?P<LastFour>[0-9]{4}))` <br><br> `/autolink set Visa Template VISA XXXX-XXXX-XXXX-$LastFour` <br><br> `/autolink set Visa WordMatch true` <br><br> `/autolink set Visa LogHits true` <br><br> `/autolink log <channel_id>` <br><br> `/autolink bot <bot_id>` <br><br> `/autolink set Visa ProcessBotPosts true` <br><br> `/autolink set Visa Scope team/townsquare` <br><br>
 
 
 ## Development
